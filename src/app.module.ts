@@ -1,13 +1,17 @@
-import { Module } from '@nestjs/common'
+import { Module, HttpModule  } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { TransformInterceptor } from './transformers/app.interceptor'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { NetworkModule } from './network/network.module'
+import { LinenotiModule } from './linenoti/linenoti.module'
+import { QuotesService } from './services/quotes/quotes.service'
 
 @Module({
   imports: [
-    NetworkModule
+    HttpModule,
+    NetworkModule,
+    LinenotiModule
   ],
   controllers: [AppController],
   providers: [
@@ -15,7 +19,8 @@ import { NetworkModule } from './network/network.module'
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor
-    }
+    },
+    QuotesService
   ]
 })
 export class AppModule {}

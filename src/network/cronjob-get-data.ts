@@ -22,9 +22,9 @@ export class CronjobGetData extends NestSchedule {
     //   await this.getDeviceData(ip, deviceName[index])
     // })
     console.log(`get data @ ${new Date()}`)
-    DEVICE_IP.forEach(async (ip, index) => {
-      await this.getDeviceData(ip, DEVICE_NAME[index])
-    })
+    // DEVICE_IP.forEach(async (ip, index) => {
+    //   await this.getDeviceData(ip, DEVICE_NAME[index])
+    // })
   }
 
   private async getDeviceData(deviceIp: string, deviceName: string): Promise<void> {
