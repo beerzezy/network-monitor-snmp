@@ -2,11 +2,10 @@ import { Injectable, HttpService } from '@nestjs/common'
 import { db } from 'src/database/firebase.config'
 import * as moment from 'moment'
 import { LinenotiInterface } from './linenoti.interface'
-import { Observable } from 'rxjs';
-import { AxiosResponse } from 'axios'
-import { map } from 'rxjs/operators'
 import { DNSHealthIndicator, HealthCheckService } from '@nestjs/terminus'
 import { DEVICES } from '../const/app.const'
+import axios from 'axios'
+import * as qs from 'qs'
  
 @Injectable()
 export class LinenotiService {
@@ -17,10 +16,25 @@ export class LinenotiService {
     private dns: DNSHealthIndicator
   ) {}
 
-  async getStatusService() {} // check status 200
+  async getStatusService() {
+  } // check status 200
 
-  async sendNoti() {
-    return this.httpService.get('http://localhost:9001/linenoti').pipe(map(response => response.data))
+  async sendMessage() {
+    //return this.httpService.post('https://notify-api.line.me/api/notify').pipe(map(response => response.data))
+
+    let token = 'oh9PA0x5oFNDd83fUZRRwlhO44sseTkZFbDRNoGZmQF'
+    const { data } = await axios({
+      method: 'POST',
+      url: 'https://notify-api.line.me/api/notify',
+      data: qs.stringify({
+        message: 'KUY RAI JAN'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    return data
   }
 
   async healthCheckDevice(deviceName: string) {

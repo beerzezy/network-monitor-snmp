@@ -20,8 +20,8 @@ export class LinenotiController {
     return this.linenotiService.healthCheckDevice(deviceName)
   }
 
-  @Get('sendnoti')
-  async sendNoti() {
-    return this.linenotiService.sendNoti()
+  @Get('sendmessage')
+  async sendMessage() {
+    return this.linenotiService.sendMessage()
   }
 }
