@@ -22,6 +22,7 @@ export class LinenotiController {
 
   @Get('sendmessage')
   async sendMessage() {
-    return this.linenotiService.sendMessage()
+    let status = '', statusstatus = ''
+    return this.linenotiService.sendMessage(status, status)
   }
 }

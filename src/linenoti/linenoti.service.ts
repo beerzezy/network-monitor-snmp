@@ -19,7 +19,7 @@ export class LinenotiService {
   async getStatusService() {
   } // check status 200
 
-  async sendMessage() {
+  async sendMessage(status: string, deviceName: string) {
     //return this.httpService.post('https://notify-api.line.me/api/notify').pipe(map(response => response.data))
 
     let token = 'oh9PA0x5oFNDd83fUZRRwlhO44sseTkZFbDRNoGZmQF'
@@ -27,7 +27,7 @@ export class LinenotiService {
       method: 'POST',
       url: 'https://notify-api.line.me/api/notify',
       data: qs.stringify({
-        message: 'KUY RAI JAN'
+        message: `${deviceName} is ${status}`
       }),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -44,8 +44,12 @@ export class LinenotiService {
       devices_ip = deviceName
     }
     
-    return this.health.check([
-        async () => this.dns.pingCheck(deviceName, `http://${devices_ip}`)
+    const x = this.health.check([
+      async () => this.dns.pingCheck(deviceName, `http://${devices_ip}`)
     ])
+    let status = (await x).status
+    let data = { status: status, deviceName: deviceName }
+
+    return data
   }
 }
