@@ -19,8 +19,8 @@ export class LinenotiLogic extends NestSchedule {
         console.log(new Date(new Date().getTime() + 24 * 60 * 60 * 1000))
         
         // check status device sw9400 and then status is down will send linenotify
-        let deviceInfo = await this.checkStatusSW9400()
-        console.log('health check device info => ', deviceInfo.status, deviceInfo.deviceName)
+        // let deviceInfo = await this.checkStatusSW9400()
+        // console.log('health check device info => ', deviceInfo.status, deviceInfo.deviceName)
         // if (deviceInfo.status == 'down') {
         //     this.linenotiService.sendMessage(deviceInfo.status, deviceInfo.deviceName)
         // }
