@@ -29,8 +29,10 @@ export async function getUpTime(device: any): Promise<unknown> {
 
 export async function getCpu(device: any): Promise<unknown> {
   const result = new Observable(observer => {
-    device.get({ oid: [1, 3, 6, 1, 4, 1, 9, 9, 109, 1, 1, 1, 1, 5, 1] }, (err, varbinds) => {
-      observer.next(varbinds[0].value)
+    device.getSubtree({ oid: [1, 3, 6, 1, 4, 1, 9, 9, 109, 1, 1, 1, 1, 5] }, (err, varbinds) => {
+      //observer.next(varbinds[0].value)
+      const value = (varbinds.length === 0) ? 'novalue' : varbinds[0].value
+      observer.next(value)
       observer.complete()
     })
   })
@@ -112,6 +114,23 @@ export async function getInterface(device: any): Promise<unknown> {
     const interfacePort = []
     const interfaceOid = []
     device.getSubtree({ oid: [1, 3, 6, 1, 2, 1, 2, 2, 1, 2] }, (err, varbinds) => {
+      for (const varbind of varbinds) {
+        interfaceOid.push(varbind.oid)
+        interfacePort.push(varbind.value)
+      }
+      observer.next({ interfaceOid, interfacePort })
+      observer.complete()
+    })
+  })
+
+  return result.toPromise()
+}
+
+export async function getInterfaceAdminStatus(device: any): Promise<unknown> {
+  const result = new Observable(observer => {
+    const interfacePort = []
+    const interfaceOid = []
+    device.getSubtree({ oid: [1, 3, 6, 1, 2, 1, 2, 2, 1, 7] }, (err, varbinds) => {
       for (const varbind of varbinds) {
         interfaceOid.push(varbind.oid)
         interfacePort.push(varbind.value)

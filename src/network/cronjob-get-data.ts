@@ -3,7 +3,7 @@ import { NestSchedule, Cron } from 'nest-schedule'
 import { NetworkService } from './network.service'
 import * as snmp from 'snmp-native'
 import { getOs, getUpTime, getCpu, getMemory, getTemperature, getInbound, getOutbound,
-  getInterfaceStatus, getInterface } from './utils/get-data.utils'
+  getInterfaceStatus, getInterface, getInterfaceAdminStatus } from './utils/get-data.utils'
 import { DEVICE_IP, DEVICE_NAME } from 'src/const/app.const'
 
 @Injectable()
@@ -39,7 +39,8 @@ export class CronjobGetData extends NestSchedule {
         getInbound(device),
         getOutbound(device),
         getInterfaceStatus(device),
-        getInterface(device)
+        getInterface(device),
+        getInterfaceAdminStatus(device)
       ])
       const deviceDataPayload = {
         ip: deviceIp,
@@ -50,11 +51,14 @@ export class CronjobGetData extends NestSchedule {
         temperature: result[4]
       }
       const interfaceResult: any = result[8]
+      const interfaceResultAdminStatus: any = result[9]
       await Promise.all([
         this.networkService.setDeviceData(deviceName, deviceDataPayload),
         this.setInterface(deviceName, {
           interfaceName: interfaceResult.interfacePort,
           interfaceOid: interfaceResult.interfaceOid,
+          interfaceNameAdminStatus: interfaceResultAdminStatus.interfacePort,
+          interfaceOidAdminStatus: interfaceResultAdminStatus.interfaceOid,
           interfaceStatus: result[7],
           inbounds: result[5],
           outbounds: result[6]
@@ -67,14 +71,16 @@ export class CronjobGetData extends NestSchedule {
   }
 
   private async setInterface(deviceName: string, interfaceData: any): Promise<void> {
-    const { interfaceName, interfaceOid, interfaceStatus, inbounds, outbounds } = interfaceData
+    const { interfaceName, interfaceOid, interfaceStatus, inbounds, outbounds, interfaceOidAdminStatus, interfaceNameAdminStatus} = interfaceData
     interfaceName.forEach(async (nameValue: string, index: number) => {
       const name = nameValue.replace(/\//g, '-')
       const interfaceDataPayload = {
         oid: interfaceOid[index],
         status: interfaceStatus[index],
         inbound: inbounds[index],
-        outbound: outbounds[index]
+        outbound: outbounds[index],
+        oidAdminStatus: interfaceOidAdminStatus[index],
+        interfaceNameAdminStatus: interfaceNameAdminStatus[index]
       }
       try {
         await this.networkService.setDeviceInterface(deviceName, name, interfaceDataPayload)      
