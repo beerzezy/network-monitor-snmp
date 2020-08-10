@@ -66,7 +66,7 @@ export class CronjobGetData extends NestSchedule {
           }
         })
 
-        // Delete file after send Line Noti
+        // Delete file after check trap reload
         fs.unlink(this.filePath.toString(), (err) => {
           if (err) throw err;
           console.log(`${this.filePath.toString()} was deleted`);
