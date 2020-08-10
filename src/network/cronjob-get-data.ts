@@ -5,13 +5,20 @@ import * as snmp from 'snmp-native'
 import { getOs, getUpTime, getCpu, getMemory, getTemperature, getInbound, getOutbound,
   getInterfaceStatus, getInterface, getInterfaceAdminStatus } from './utils/get-data.utils'
 import { DEVICE_IP, DEVICE_NAME } from 'src/const/app.const'
+import axios from 'axios'
+import * as qs from 'qs'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as readline from 'readline'
 
 @Injectable()
 export class CronjobGetData extends NestSchedule {
+  filePath: string;
   constructor(
     private readonly networkService: NetworkService
   ) {
     super()
+    this.filePath = path.format({ dir: 'D:\\Syslog\\Logs', base: 'SyslogCatchAll.txt'});
   }
 
   @Cron('* * * * *')
@@ -22,11 +29,71 @@ export class CronjobGetData extends NestSchedule {
     //   await this.getDeviceData(ip, deviceName[index])
     // })
     console.log(`get data @ ${new Date()}`)
-    DEVICE_IP.forEach(async (ip, index) => {
-      await this.getDeviceData(ip, DEVICE_NAME[index])
-    })
+    // DEVICE_IP.forEach(async (ip, index) => {
+    //   await this.getDeviceData(ip, DEVICE_NAME[index])
+    // })
+
+    this.readSyslogFile()
   }
 
+  private async readSyslogFile() {
+    try {
+      if (fs.existsSync(this.filePath.toString())) {
+        const fileStream = fs.createReadStream(this.filePath.toString());
+        const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+    
+        var sysLogData = []
+        for await (const line of rl) {
+          let replaceDoubleQuote = line.replace(/"/g, "");
+          let replaceCommas = replaceDoubleQuote.replace(/, /g, ',');
+          let arrayData = replaceCommas.split(',');
+          let len = arrayData.length
+          let sliced = arrayData.slice(3, len);
+          sysLogData.push({
+            datetime: arrayData[0],
+            priority: arrayData[1],
+            hostname: arrayData[2],
+            message: sliced.toString()
+          })
+        }
+        //console.log(sysLogData)
+        sysLogData.forEach(data => {
+          let w1 = data.message.includes("Reload Command");
+          let w2 = data.message.includes("reload");
+          if (w1 || w2) {
+            this.sendMessage(data.datetime, data.hostname, data.message)
+            console.log("Send Trap to Line Noti")
+          }
+        })
+
+        // Delete file after send Line Noti
+        fs.unlink(this.filePath.toString(), (err) => {
+          if (err) throw err;
+          console.log(`${this.filePath.toString()} was deleted`);
+        });
+      }
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  private async sendMessage(datetime: string, hostname: string, message: string) {
+    let token = 'oh9PA0x5oFNDd83fUZRRwlhO44sseTkZFbDRNoGZmQF'
+
+    const { data } = await axios({
+      method: 'POST',
+      url: 'https://notify-api.line.me/api/notify',
+      data: qs.stringify({
+        message: `The device is reloaded, Detail => Date: ${datetime}, Hostname: ${hostname}, Message: ${message}`
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    return data
+}
+  
   private async getDeviceData(deviceIp: string, deviceName: string): Promise<void> {
     const device = new snmp.Session({ host: deviceIp, community: 'public' })
     try {
