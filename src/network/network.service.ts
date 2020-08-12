@@ -41,7 +41,11 @@ export class NetworkService {
 
   async setDeviceTraffic(deviceName: string, inbound: number, outbound: number): Promise<void> {
     const timestamp = new Date(moment.utc().toString())
-    await this.networkRef.doc(deviceName).collection('traffic').add({ inbound, outbound, timestamp })
+    
+    var time = new Date(moment(timestamp ,'YYYY-MM-DD HH:mm:ss').add(7, 'hour').format('YYYY-MM-DDTHH:mm:ss'))
+    var epoch = +time
+
+    await this.networkRef.doc(deviceName).collection('traffic').add({ inbound, outbound, timestamp, epoch})
   }
 
   async setDeviceSpeed(deviceName: string, speed: number): Promise<void> {
