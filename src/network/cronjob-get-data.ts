@@ -61,7 +61,7 @@ export class CronjobGetData extends NestSchedule {
           let w1 = data.message.includes("Reload Command");
           let w2 = data.message.includes("reload");
           if (w1 || w2) {
-            this.sendMessage(data.datetime, data.hostname, data.message)
+            this.sendMessage(data.datetime, data.hostname)
             console.log("Send Trap to Line Noti")
           }
         })
@@ -77,14 +77,14 @@ export class CronjobGetData extends NestSchedule {
     }
   }
 
-  private async sendMessage(datetime: string, hostname: string, message: string) {
+  private async sendMessage(datetime: string, hostname: string) {
     let token = 'oh9PA0x5oFNDd83fUZRRwlhO44sseTkZFbDRNoGZmQF'
 
     const { data } = await axios({
       method: 'POST',
       url: 'https://notify-api.line.me/api/notify',
       data: qs.stringify({
-        message: `The device is reloaded, Detail => Date: ${datetime}, Hostname: ${hostname}, Message: ${message}`
+        message: `The device is reloaded, Detail => Date: ${datetime}, Hostname: ${hostname}`
       }),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
