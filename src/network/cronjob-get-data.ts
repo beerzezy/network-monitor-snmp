@@ -104,7 +104,7 @@ export class CronjobGetData extends NestSchedule {
         getMemory(device),
         getTemperature(device),
         getInbound(device , deviceIp),
-        getOutbound(device),
+        getOutbound(device , deviceIp),
         getInterfaceStatus(device),
         getInterface(device),
         getInterfaceAdminStatus(device)

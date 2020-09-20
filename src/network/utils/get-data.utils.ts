@@ -91,12 +91,23 @@ export async function getInbound(device: any,deviceIp: string): Promise<unknown>
   return result.toPromise()
 }
 
-export async function getOutbound(device: any): Promise<unknown> {
+export async function getOutbound(device: any,deviceIp: string): Promise<unknown> {
   const result = new Observable(observer => {
     const outbound = []
     device.getSubtree({ oid: [1, 3, 6, 1, 2, 1, 2, 2, 1, 16] }, (err, varbinds) => {
       for (const varbind of varbinds) {
-        outbound.push(Math.round(varbind.value / 1048576))
+        DEVICE_LIST.forEach(poperty => {
+          if (poperty.ip == deviceIp) {
+            poperty.oids.forEach(oid => {
+              let isSame = oid.every(function(element, index) {
+                return element === varbind.oid[index]
+              })
+              if (!isSame) {
+                outbound.push(Math.round(varbind.value / 1048576))
+              }
+            })
+          }
+        })
       }
       observer.next(outbound)
       observer.complete()
