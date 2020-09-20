@@ -72,14 +72,18 @@ export async function getInbound(device: any,deviceIp: string): Promise<unknown>
       for (const varbind of varbinds) {
         DEVICE_LIST.forEach(poperty => {
           if (poperty.ip == deviceIp) {
+            let isSame = false
             poperty.oids.forEach(oid => {
-              let isSame = oid.every(function(element, index) {
+              let isOidSame = oid.every(function(element, index) {
                 return element === varbind.oid[index]
               })
-              if (!isSame) {
-                inbound.push(Math.round(varbind.value / 1048576))
+              if(isOidSame) {
+                isSame = true
               }
             })
+            if (!isSame) {
+              inbound.push(Math.round(varbind.value / 1048576))
+            }
           }
         })
       }
@@ -98,18 +102,23 @@ export async function getOutbound(device: any,deviceIp: string): Promise<unknown
       for (const varbind of varbinds) {
         DEVICE_LIST.forEach(poperty => {
           if (poperty.ip == deviceIp) {
+            let isSame = false
             poperty.oids.forEach(oid => {
-              let isSame = oid.every(function(element, index) {
+              let isOidSame = oid.every(function(element, index) {
                 return element === varbind.oid[index]
               })
-              if (!isSame) {
-                outbound.push(Math.round(varbind.value / 1048576))
+              if(isOidSame) {
+                isSame = true
               }
             })
+            if (!isSame) {
+              outbound.push(Math.round(varbind.value / 1048576))
+            }
           }
         })
       }
       observer.next(outbound)
+      observer.complete()
       observer.complete()
     })
   })
