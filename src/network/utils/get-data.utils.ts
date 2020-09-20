@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs'
-import { OID_LIST } from 'src/const/app.const'
+import { DEVICE_LIST } from 'src/const/app.const'
 
 export async function getOs(device: any): Promise<unknown> {
   const result = new Observable(observer => {
@@ -64,52 +64,24 @@ export async function getTemperature(device: any): Promise<unknown> {
   return result.toPromise()
 }
 
-export async function getInbound(device: any): Promise<unknown> {
+export async function getInbound(device: any,deviceIp: string): Promise<unknown> {
   const result = new Observable(observer => {
     const inbound = []
 
     device.getSubtree({ oid: [1, 3, 6, 1, 2, 1, 2, 2, 1, 10] }, (err, varbinds) => {
       for (const varbind of varbinds) {
-
-        OID_LIST.forEach(e => {
-          if (e.ip == "10.99.1.1") {
-            let is_same = varbind.oid.every(function(element, index) {
-              return element === e.oid[index]
+        DEVICE_LIST.forEach(poperty => {
+          if (poperty.ip == deviceIp) {
+            poperty.oids.forEach(oid => {
+              let isSame = oid.every(function(element, index) {
+                return element === varbind.oid[index]
+              })
+              if (!isSame) {
+                inbound.push(Math.round(varbind.value / 1048576))
+              }
             })
-            if (is_same == false) {
-              //console.log("=========== push ===========", e.ip)
-              //inbound.push(Math.round(varbind.value / 1048576))
-            } else {
-              //console.log("=========== no push ===========", varbind.oid)
-            }
-          }
-
-          if (e.ip == "10.99.4.1") {
-            let is_same = varbind.oid.every(function(element, index) {
-              return element === e.oid[index]
-            })
-            if (is_same == false) {
-              //console.log("=========== push ===========", e.ip)
-              //inbound.push(Math.round(varbind.value / 1048576))
-            } else {
-              //console.log("=========== no push ===========", varbind.oid)
-            }
-          }
-
-          if (e.ip == "10.99.6.1") {
-            let is_same = varbind.oid.every(function(element, index) {
-              return element === e.oid[index]
-            })
-            if (is_same == false) {
-              //console.log("=========== push ===========", e.ip)
-              //inbound.push(Math.round(varbind.value / 1048576))
-            } else {
-              console.log("=========== no push ===========", e.ip, varbind.oid)
-            }
           }
         })
-
-        // inbound.push(Math.round(varbind.value / 1048576))
       }
       observer.next(inbound)
       observer.complete()
